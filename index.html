@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>St Mary Pharmacy Delivery System</title>
@@ -11,8 +12,8 @@
             font-family: Arial, sans-serif;
             text-align: center;
             padding: 50px;
-            border: 2px solid white;
-            border-radius: 20px;
+            border: 2px solid white; /* White border around the page */
+            border-radius: 20px; /* Rounded corners */
         }
 
         label, select, input {
@@ -25,23 +26,38 @@
         }
 
         #photoInput {
-            display: none;
+            display: none; /* Hide the photo input initially */
         }
 
         button {
             background-color: purple;
             color: white;
             border: none;
-            padding: 15px;
+            padding: 15px; /* Increased padding for a bigger button */
             cursor: pointer;
             display: block;
-            margin: 15px auto;
-            border-radius: 10px;
-            width: 200px;
+            margin: 15px auto; /* Center the button on a separate line */
+            border-radius: 10px; /* Rounded corners for the button */
+            width: 200px; /* Wider button dimensions */
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #6a1b9a; /* Change color on hover */
+        }
+
+        button:active {
+            background-color: #4a148c; /* Change color when pressed */
+            transform: translateY(2px); /* Add a slight downward shift on press */
         }
 
         #barcodeScanner {
-            margin: 10px auto;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        #scannedRxNumber {
+            margin-top: 10px;
         }
     </style>
 </head>
@@ -53,53 +69,99 @@
         <label for="rxNumber">Rx Number:</label>
         <input type="text" id="rxNumber" name="rxNumber" pattern="[0-9]*" inputmode="numeric" title="Only numbers allowed">
 
-        <!-- ... (existing form elements) ... -->
+        <label for="copaymentAmount">Copayment Amount ($):</label>
+        <input type="text" id="copaymentAmount" name="copaymentAmount" pattern="\d*" inputmode="numeric" value="0">
+
+        <label for="deliveryMethod">How Delivered:</label>
+        <select id="deliveryMethod" name="deliveryMethod" onchange="showPhotoInput()">
+            <option value="inHand">In Hand</option>
+            <option value="atDoor">At the Door</option>
+            <option value="behindShield">Behind the Shield Door</option>
+            <option value="inMailbox">In the Mailbox</option>
+        </select>
 
         <!-- Barcode Scanner -->
-        <button type="button" id="barcodeScanner" onclick="scanBarcode()">Scan Rx Barcode</button>
+        <div id="barcodeScanner"></div>
 
         <!-- Display the scanned barcode -->
         <div id="scannedRxNumber"></div>
 
-        <!-- ... (existing form elements) ... -->
+        <!-- Photo input -->
+        <input type="file" accept="image/*" id="photoInput" capture="camera">
 
-        <button type="button" onclick="copyToClipboard()">Copy Rx to Clipboard</button>
-        <!-- ... (existing form elements) ... -->
+        <!-- Display the selected photo -->
+        <img id="selectedPhoto" alt="Selected Photo" style="display: none; max-width: 300px; margin-top: 10px;">
 
+        <label for="notes">Notes:</label>
+        <textarea id="notes" name="notes" rows="4" placeholder="Enter any additional notes"></textarea>
+
+        <!-- Button to initiate barcode scanner for Rx number -->
+        <button type="button" onclick="scanBarcode()">Scan Rx Barcode</button>
+
+        <!-- Button to get the current location and send message via Telegram bot -->
         <button type="button" onclick="getCurrentLocation()">Submit</button>
+        <button type="button" onclick="copyRxToClipboard()">Copy Rx to Clipboard</button>
     </form>
 
-    <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.28.0"></script>
     <script>
-        // Function to initiate barcode scanning using Instascan
+        // Function to show/hide photo input based on selected delivery method
+        function showPhotoInput() {
+            const deliveryMethod = document.getElementById("deliveryMethod").value;
+            const photoInput = document.getElementById("photoInput");
+            const selectedPhoto = document.getElementById("selectedPhoto");
+
+            // Show photo input only if the delivery method is not "inHand"
+            photoInput.style.display = (deliveryMethod !== "inHand") ? "block" : "none";
+            selectedPhoto.style.display = "none"; // Hide the selected photo if the delivery method changes
+
+            // If "In Hand" is selected, set the default image URL
+            if (deliveryMethod === "inHand") {
+                selectedPhoto.src = "https://raw.githubusercontent.com/drjohnasaad/Stmary-ODS/main/IMG_1662.webp";
+                selectedPhoto.style.display = "block";
+            }
+        }
+
+        // Function to initiate barcode scanning using ZXing library
         function scanBarcode() {
-            const scanner = new Instascan.Scanner({ video: document.getElementById('barcodeScanner') });
+            const codeReader = new ZXing.BrowserBarcodeReader();
 
-            scanner.addListener('scan', function (content) {
-                document.getElementById("rxNumber").value = content;
-                document.getElementById("scannedRxNumber").innerText = "Scanned Rx: " + content;
-                scanner.stop();
-            });
-
-            Instascan.Camera.getCameras().then(function (cameras) {
-                if (cameras.length > 0) {
-                    scanner.start(cameras[0]);
-                } else {
-                    console.error('No cameras found.');
-                    alert('No cameras found. Unable to scan.');
-                }
-            }).catch(function (e) {
-                console.error(e);
-                alert('Error accessing cameras. Unable to scan.');
-            });
+            codeReader.decodeFromInputVideoDevice(undefined, 'barcodeScanner')
+                .then(result => {
+                    const scannedRxNumber = result.text;
+                    document.getElementById("rxNumber").value = scannedRxNumber;
+                    document.getElementById("scannedRxNumber").innerText = "Scanned Rx: " + scannedRxNumber;
+                })
+                .catch(err => console.error(err));
         }
 
         // Function to copy Rx number to clipboard
-        function copyToClipboard() {
+        function copyRxToClipboard() {
             const rxNumberInput = document.getElementById("rxNumber");
             rxNumberInput.select();
             document.execCommand("copy");
             alert("Rx number copied to clipboard!");
+        }
+
+        // Function to prompt user for GPS location
+        function getCurrentLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+
+                        // Call function to send message with obtained location
+                        sendMessage(latitude, longitude);
+                    },
+                    (error) => {
+                        console.error('Error getting location:', error);
+                        alert('Failed to get current location. Please enable GPS and try again.');
+                    }
+                );
+            } else {
+                alert('Geolocation is not supported by your browser.');
+            }
         }
 
         // Your existing JavaScript code for location and Telegram bot
