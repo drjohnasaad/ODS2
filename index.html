@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>St Mary Pharmacy Delivery System</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            border: 2px solid white;
+            border-radius: 20px;
+        }
+
+        label, select, input {
+            display: block;
+            margin: 10px auto;
+        }
+
+        select, input {
+            padding: 5px;
+        }
+
+        #photoInput {
+            display: none;
+        }
+
+        button {
+            background-color: purple;
+            color: white;
+            border: none;
+            padding: 15px;
+            cursor: pointer;
+            display: block;
+            margin: 15px auto;
+            border-radius: 10px;
+            width: 200px;
+        }
+
+        #barcodeScanner {
+            margin: 10px auto;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>St Mary Pharmacy Delivery System</h1>
+
+    <form id="deliveryForm">
+        <label for="rxNumber">Rx Number:</label>
+        <input type="text" id="rxNumber" name="rxNumber" pattern="[0-9]*" inputmode="numeric" title="Only numbers allowed">
+
+        <label for="copaymentAmount">Copayment Amount ($):</label>
+        <input type="text" id="copaymentAmount" name="copaymentAmount" pattern="\d*" inputmode="numeric" value="0">
+
+        <label for="deliveryMethod">How Delivered:</label>
+        <select id="deliveryMethod" name="deliveryMethod" onchange="showPhotoInput()">
+            <option value="inHand">In Hand</option>
+            <option value="atDoor">At the Door</option>
+            <option value="behindShield">Behind the Shield Door</option>
+            <option value="inMailbox">In the Mailbox</option>
+        </select>
+
+        <!-- Photo input -->
+        <input type="file" accept="image/*" id="photoInput" capture="camera">
+
+        <!-- Display the selected photo -->
+        <img id="selectedPhoto" alt="Selected Photo" style="display: none; max-width: 300px; margin-top: 10px;">
+
+        <!-- Barcode Scanner -->
+        <button type="button" id="barcodeScanner" onclick="scanBarcode()">Scan Rx Barcode</button>
+
+        <!-- Display the scanned barcode -->
+        <div id="scannedRxNumber"></div>
+
+        <label for="notes">Notes:</label>
+        <textarea id="notes" name="notes" rows="4" placeholder="Enter any additional notes"></textarea>
+
+        <!-- Button to get current location and send message via Telegram bot -->
+        <button type="button" onclick="getCurrentLocation()">Submit</button>
+    </form>
+
+    <script src="https://cdn.rawgit.com/serratus/quaggaJS/master/dist/quagga.min.js"></script>
+    <script>
+        // Your existing JavaScript code with added barcode scanning and copying functions
+        // ...
+
+        // Function to initiate barcode scanning
+        function scanBarcode() {
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector('#barcodeScanner'),
+                    constraints: {
+                        width: 480,
+                        height: 320,
+                        facingMode: "environment", // or "user" for the front camera
+                    },
+                },
+                decoder: {
+                    readers: ["code_128_reader"],
+                },
+            }, function (err) {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                Quagga.start();
+            });
+
+            Quagga.onDetected(function (result) {
+                const scannedRxNumber = result.codeResult.code;
+                document.getElementById("rxNumber").value = scannedRxNumber;
+                document.getElementById("scannedRxNumber").innerText = "Scanned Rx: " + scannedRxNumber;
+                Quagga.stop();
+            });
+        }
+
+        // Function to copy Rx number to clipboard
+        function copyToClipboard() {
+            const rxNumberInput = document.getElementById("rxNumber");
+            rxNumberInput.select();
+            document.execCommand("copy");
+            alert("Rx number copied to clipboard!");
+        }
+    </script>
+</body>
+</html>
