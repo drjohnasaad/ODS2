@@ -35,8 +35,6 @@
             border: none;
             padding: 15px; /* Increased padding for a bigger button */
             cursor: pointer;
-            display: block;
-            margin: 15px auto; /* Center the button on a separate line */
             border-radius: 10px; /* Rounded corners for the button */
             width: 200px; /* Wider button dimensions */
             transition: background-color 0.3s ease;
@@ -58,6 +56,16 @@
 
         #scannedRxNumber {
             margin-top: 10px;
+        }
+
+        #buttonContainer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #buttonContainer button {
+            margin: 10px;
         }
     </style>
 
@@ -92,18 +100,20 @@
         <!-- Photo input -->
         <input type="file" accept="image/*" id="photoInput" capture="camera">
 
-        <!-- Display the selected photo -->
-        <img id="selectedPhoto" alt="Selected Photo" style="display: none; max-width: 300px; margin-top: 10px;">
+        <!-- Button container with layout adjustments -->
+        <div id="buttonContainer">
+            <!-- Button to initiate barcode scanner for Rx number -->
+            <button type="button" onclick="scanBarcode()">Scan Rx Barcode</button>
+
+            <!-- Button to copy Rx number to clipboard -->
+            <button type="button" onclick="copyRxToClipboard()">Copy Rx to Clipboard</button>
+        </div>
 
         <label for="notes">Notes:</label>
         <textarea id="notes" name="notes" rows="4" placeholder="Enter any additional notes"></textarea>
 
-        <!-- Button to initiate barcode scanner for Rx number -->
-        <button type="button" onclick="scanBarcode()">Scan Rx Barcode</button>
-
         <!-- Button to get the current location and send message via Telegram bot -->
         <button type="button" onclick="getCurrentLocation()">Submit</button>
-        <button type="button" onclick="copyRxToClipboard()">Copy Rx to Clipboard</button>
     </form>
 
     <script>
