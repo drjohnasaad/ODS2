@@ -53,22 +53,7 @@
         <label for="rxNumber">Rx Number:</label>
         <input type="text" id="rxNumber" name="rxNumber" pattern="[0-9]*" inputmode="numeric" title="Only numbers allowed">
 
-        <label for="copaymentAmount">Copayment Amount ($):</label>
-        <input type="text" id="copaymentAmount" name="copaymentAmount" pattern="\d*" inputmode="numeric" value="0">
-
-        <label for="deliveryMethod">How Delivered:</label>
-        <select id="deliveryMethod" name="deliveryMethod" onchange="showPhotoInput()">
-            <option value="inHand">In Hand</option>
-            <option value="atDoor">At the Door</option>
-            <option value="behindShield">Behind the Shield Door</option>
-            <option value="inMailbox">In the Mailbox</option>
-        </select>
-
-        <!-- Photo input -->
-        <input type="file" accept="image/*" id="photoInput" capture="camera">
-
-        <!-- Display the selected photo -->
-        <img id="selectedPhoto" alt="Selected Photo" style="display: none; max-width: 300px; margin-top: 10px;">
+        <!-- ... (existing form elements) ... -->
 
         <!-- Barcode Scanner -->
         <button type="button" id="barcodeScanner" onclick="scanBarcode()">Scan Rx Barcode</button>
@@ -76,47 +61,36 @@
         <!-- Display the scanned barcode -->
         <div id="scannedRxNumber"></div>
 
-        <label for="notes">Notes:</label>
-        <textarea id="notes" name="notes" rows="4" placeholder="Enter any additional notes"></textarea>
+        <!-- ... (existing form elements) ... -->
 
-        <!-- Button to get current location and send message via Telegram bot -->
+        <button type="button" onclick="copyToClipboard()">Copy Rx to Clipboard</button>
+        <!-- ... (existing form elements) ... -->
+
         <button type="button" onclick="getCurrentLocation()">Submit</button>
     </form>
 
-    <script src="https://cdn.rawgit.com/serratus/quaggaJS/master/dist/quagga.min.js"></script>
+    <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
     <script>
-        // Your existing JavaScript code with added barcode scanning and copying functions
-        // ...
-
-        // Function to initiate barcode scanning
+        // Function to initiate barcode scanning using Instascan
         function scanBarcode() {
-            Quagga.init({
-                inputStream: {
-                    name: "Live",
-                    type: "LiveStream",
-                    target: document.querySelector('#barcodeScanner'),
-                    constraints: {
-                        width: 480,
-                        height: 320,
-                        facingMode: "environment", // or "user" for the front camera
-                    },
-                },
-                decoder: {
-                    readers: ["code_128_reader"],
-                },
-            }, function (err) {
-                if (err) {
-                    console.error(err);
-                    return;
-                }
-                Quagga.start();
+            const scanner = new Instascan.Scanner({ video: document.getElementById('barcodeScanner') });
+
+            scanner.addListener('scan', function (content) {
+                document.getElementById("rxNumber").value = content;
+                document.getElementById("scannedRxNumber").innerText = "Scanned Rx: " + content;
+                scanner.stop();
             });
 
-            Quagga.onDetected(function (result) {
-                const scannedRxNumber = result.codeResult.code;
-                document.getElementById("rxNumber").value = scannedRxNumber;
-                document.getElementById("scannedRxNumber").innerText = "Scanned Rx: " + scannedRxNumber;
-                Quagga.stop();
+            Instascan.Camera.getCameras().then(function (cameras) {
+                if (cameras.length > 0) {
+                    scanner.start(cameras[0]);
+                } else {
+                    console.error('No cameras found.');
+                    alert('No cameras found. Unable to scan.');
+                }
+            }).catch(function (e) {
+                console.error(e);
+                alert('Error accessing cameras. Unable to scan.');
             });
         }
 
@@ -127,6 +101,9 @@
             document.execCommand("copy");
             alert("Rx number copied to clipboard!");
         }
+
+        // Your existing JavaScript code for location and Telegram bot
+        // ...
     </script>
 </body>
 </html>
