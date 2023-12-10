@@ -215,12 +215,14 @@
                 const rxNumber = document.getElementById("rxNumber").value;
                 const deliveryMethod = document.getElementById("deliveryMethod").value;
                 const notes = document.getElementById("notes").value;
+                const copaymentAmount = document.getElementById("copaymentAmount").value;
 
                 let selectedPhoto = null;
                 const photoInput = document.getElementById("photoInput");
                 if (photoInput.files.length > 0) {
                     selectedPhoto = photoInput.files[0];
                 }
+                
 
                 const address = await getAddressFromLocation(latitude, longitude); // Fetch address
 
@@ -232,7 +234,7 @@
                 const mapsLink = `https://www.bing.com/maps?q=${latitude},${longitude}`;
 
                 // Construct the message
-                let message = `Rx: ${rxNumber}\nLocation: ${address}\nBing Maps: ${mapsLink}\nHow Delivered: ${deliveryMethod}\nNotes:${notes}\nDate & Time: ${formattedDate} on ${formattedTime}`;
+                let message = `Rx: ${rxNumber}\nLocation: ${address}\nBing Maps: ${mapsLink}\nHow Delivered: ${deliveryMethod}\nCopayment: ${copaymentAmount}\nNotes:${notes}\nDate & Time: ${formattedDate} on ${formattedTime}`;
 
                 // You would typically send this message to your Telegram bot (you need to implement this)
                 if (selectedPhoto) {
