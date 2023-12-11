@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>St Mary Pharmacy Delivery System</title>
-     <link rel="icon" href="https://github.com/drjohnasaad/Stmary-ODS/blob/main/Breaking%20News.jpeg?raw=true" >
+    <link rel="icon" href="https://github.com/drjohnasaad/Stmary-ODS/blob/main/Breaking%20News.jpeg?raw=true">
     <style>
         body {
             background-color: black;
@@ -15,6 +14,18 @@
             padding: 50px;
             border: 2px solid white; /* White border around the page */
             border-radius: 20px; /* Rounded corners */
+            opacity: 0; /* set initial opacity to 0 */
+            animation: fadeIn 1s ease-in-out forwards; /* fadeIn animation */
+        }
+
+        /* FadeIn Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
 
         label, select, input {
@@ -68,6 +79,9 @@
         #buttonContainer button {
             margin: 10px;
         }
+
+        /* Rest of your existing styles */
+
     </style>
 
     <!-- Add the quaggaJS library -->
@@ -89,10 +103,8 @@
             <option value="inHand">In Hand</option>
             <option value="atDoor">At the Door</option>
             <option value="behindShield">Behind the Shield Door</option>
-            <option value="Returned">Returned Back</option>
             <option value="inMailbox">In the Mailbox</option>
         </select>
-        
 
         <!-- Barcode Scanner -->
         <div id="barcodeScanner"></div>
@@ -181,7 +193,8 @@
                         // Call function to send message with obtained location
                         sendMessage(latitude, longitude);
                     },
-                    (error) => {                        console.error('Error getting location:', error);
+                    (error) => {
+                        console.error('Error getting location:', error);
                         alert('Failed to get current location. Please enable GPS and try again.');
                     }
                 );
@@ -190,6 +203,7 @@
             }
         }
 
+        
         // Function to convert latitude and longitude to address using Bing Maps API
         async function getAddressFromLocation(latitude, longitude) {
             const apiKey = 'AgJByZBI9tU_t6bMrFcSycB-RNlS8uCQcMQssXD8TH7czDq0plnAu9pDXEePtU6W';
