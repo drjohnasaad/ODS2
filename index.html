@@ -139,7 +139,7 @@
             const photoInput = document.getElementById("photoInput");
 
             // Show photo input only if the delivery method is not "inHand"
-            photoInput.style.display = (deliveryMethod !== "inHand") ? "block" : "none";
+            photoInput.style.display = (deliveryMethod !== "inHand" | "Returned") ? "block" : "none";
         }
 
         // Function to initiate barcode scanning using quaggaJS library
